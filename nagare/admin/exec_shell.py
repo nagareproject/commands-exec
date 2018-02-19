@@ -187,7 +187,7 @@ class Shell(command.Command):
         or paths to applications configuration files.
         """
         ns = {'services': services_service}
-        for handler in services_service.interactive_handlers.values():
+        for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
 
         banner = 'Python %s on %s\n\n' % (sys.version, sys.platform)
@@ -222,7 +222,7 @@ class Batch(command.Command):
         """Execute Python statements from a file
         """
         ns = {'services': services_service}
-        for handler in services_service.interactive_handlers.values():
+        for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
 
         __builtin__.__dict__.update(ns)
