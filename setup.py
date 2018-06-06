@@ -36,7 +36,7 @@ setup(
     install_requires=['nagare-server'],
     entry_points='''
         [nagare.commands]
-        exec = nagare.commands:Commands
+        exec = nagare.admin.command:Commands
 
         [nagare.commands.exec]
         shell = nagare.admin.exec_shell:Shell

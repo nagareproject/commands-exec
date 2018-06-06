@@ -190,13 +190,16 @@ class Shell(command.Command):
         for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
 
-        banner = 'Python %s on %s\n\n' % (sys.version, sys.platform)
+        banner = command.BANNER + '\n\n'
+        banner += 'Python %s on %s\n\n' % (sys.version, sys.platform)
 
         if len(ns) == 1:
             banner += "Variable '%s' is available" % next(iter(ns))
         else:
             variables = ["'%s'" % variable for variable in sorted(ns)]
             banner += 'Variables ' + ', '.join(variables[:-1]) + ' and ' + variables[-1] + ' are available'
+
+        banner += '\n'
 
         app = ns.get('app')
 
