@@ -22,10 +22,13 @@ In both cases:
 import os
 import sys
 import code
-import __builtin__
+try:
+    import __builtin__ as builtins
+except ImportError:
+    import builtins
 
-from nagare.admin import command
 from nagare.server import reference
+from nagare.admin import admin, command
 
 
 class IPythonShell(object):
@@ -67,7 +70,13 @@ class PythonShell(code.InteractiveConsole):
         return code.InteractiveConsole.raw_input(self, 'Nagare' + self.prompt + prompt)
 
     def __call__(self):
-        self.interact(self.banner)
+        try:
+            self.interact(self.banner, exitmsg='')
+        except TypeError as e:
+            if 'exitmsg' in e.args[0]:
+                self.interact(self.banner)
+            else:
+                raise
 
 
 class PythonShellWithHistory(PythonShell):
@@ -120,7 +129,7 @@ def create_python_shell(plain, banner, prompt, **ns):
                 repl.all_prompt_styles['nagare'] = NagarePrompt()
                 repl.prompt_style = 'nagare'
 
-            print banner
+            print(banner)
 
             repl.embed(
                 globals(), ns,
@@ -190,7 +199,7 @@ class Shell(command.Command):
         for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
 
-        banner = command.BANNER + '\n\n'
+        banner = admin.BANNER + '\n\n'
         banner += 'Python %s on %s\n\n' % (sys.version, sys.platform)
 
         if len(ns) == 1:
@@ -228,6 +237,6 @@ class Batch(command.Command):
         for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
 
-        __builtin__.__dict__.update(ns)
+        builtins.__dict__.update(ns)
 
         reference.load_file(python_file, None)
