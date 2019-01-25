@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2018 Net-ng.
+# Copyright (c) 2008-2019 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -29,6 +29,12 @@ except ImportError:
 
 from nagare.server import reference
 from nagare.admin import admin, command
+
+
+class Commands(command.Commands):
+    DESC = 'interactive and batch runtime subcommands'
+
+# -----------------------------------------------------------------------------
 
 
 class IPythonShell(object):
@@ -174,7 +180,7 @@ def create_python_shell(plain, banner, prompt, **ns):
 
 
 class Shell(command.Command):
-    DESC = 'Launch a shell'
+    DESC = 'launch an interactive shell'
     WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):
@@ -199,7 +205,7 @@ class Shell(command.Command):
         for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
 
-        banner = admin.BANNER + '\n\n'
+        banner = admin.BANNER + '\n'
         banner += 'Python %s on %s\n\n' % (sys.version, sys.platform)
 
         if len(ns) == 1:
@@ -223,7 +229,7 @@ class Shell(command.Command):
 
 
 class Batch(command.Command):
-    DESC = 'Execute Python statements from a file'
+    DESC = 'execute Python statements from a file'
     WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):
