@@ -205,7 +205,7 @@ class Shell(command.Command):
         for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
 
-        banner = admin.BANNER + '\n'
+        banner = admin.NAGARE_BANNER + '\n'
         banner += 'Python %s on %s\n\n' % (sys.version, sys.platform)
 
         if len(ns) == 1:
