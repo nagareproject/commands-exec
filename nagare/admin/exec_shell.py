@@ -22,6 +22,7 @@ In both cases:
 import os
 import sys
 import code
+import argparse
 try:
     import __builtin__ as builtins
 except ImportError:
@@ -235,10 +236,13 @@ class Batch(command.Command):
     def set_arguments(self, parser):
         parser.add_argument('python_file', help='python batch file')
         super(Batch, self).set_arguments(parser)
+        parser.add_argument('batch_arguments', nargs=argparse.REMAINDER, help='optional batch arguments')
 
-    def run(self, python_file, services_service):
+    def run(self, python_file, batch_arguments, services_service):
         """Execute Python statements from a file
         """
+        sys.argv = [python_file] + batch_arguments
+
         ns = {'services': services_service}
         for handler in services_service.interactive_handlers:
             ns.update(handler.handle_interactive())
