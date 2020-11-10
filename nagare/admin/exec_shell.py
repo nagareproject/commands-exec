@@ -130,8 +130,11 @@ def create_python_shell(plain, banner, prompt, **ns):
         else:
             def configure(repl):
                 class NagarePrompt(prompt_style.ClassicPrompt):
-                    def in_tokens(self, cli):
-                        return [(prompt_style.Token.Prompt, 'Nagare%s>>> ' % prompt)]
+                    def in_prompt(self):
+                        return [(super(NagarePrompt, self).in_prompt()[0][0], 'Nagare%s>>> ' % prompt)]
+
+                    def in2_prompt(self, width):
+                        return [(super(NagarePrompt, self).in2_prompt(width)[0][0], 'Nagare%s... ' % prompt)]
 
                 repl.all_prompt_styles['nagare'] = NagarePrompt()
                 repl.prompt_style = 'nagare'
@@ -146,20 +149,12 @@ def create_python_shell(plain, banner, prompt, **ns):
             return
 
         try:
-            from bpython import curtsies, embed
+            from bpython import embed
         except ImportError:
             pass
         else:
-            class FullCurtsiesRepl(curtsies.FullCurtsiesRepl):
-                def __init__(self, config, *args, **kw):
-                    config.hist_file = os.path.expanduser('~/.nagarehistory')
-                    super(FullCurtsiesRepl, self).__init__(config, *args, **kw)
-
-                @property
-                def ps1(self):
-                    return 'Nagare' + prompt + super(FullCurtsiesRepl, self).ps1
-
-            curtsies.FullCurtsiesRepl = FullCurtsiesRepl
+            sys.ps1 = 'Nagare' + prompt + '>>> '
+            sys.ps2 = 'Nagare' + prompt + '... '
 
             embed(ns, banner=banner)
             return
@@ -207,12 +202,12 @@ class Shell(command.Command):
             ns.update(handler.handle_interactive())
 
         banner = admin.NAGARE_BANNER + '\n'
-        banner += 'Python %s on %s\n\n' % (sys.version, sys.platform)
+        banner += 'Python {} on {}\n\n'.format(sys.version, sys.platform)
 
         if len(ns) == 1:
-            banner += "Variable '%s' is available" % next(iter(ns))
+            banner += "Variable '{}' is available".format(next(iter(ns)))
         else:
-            variables = ["'%s'" % variable for variable in sorted(ns)]
+            variables = ["'{}'".format(variable) for variable in sorted(ns)]
             banner += 'Variables ' + ', '.join(variables[:-1]) + ' and ' + variables[-1] + ' are available'
 
         banner += '\n'
