@@ -197,9 +197,8 @@ class Shell(command.Command):
         The arguments are a list of names of registered applications
         or paths to applications configuration files.
         """
-        ns = {'services': services_service}
-        for handler in services_service.interactive_handlers:
-            ns.update(handler.handle_interactive())
+        ns = services_service.handle_interaction()
+        ns['services'] = services_service
 
         banner = admin.NAGARE_BANNER + '\n'
         banner += 'Python {} on {}\n\n'.format(sys.version, sys.platform)
@@ -238,9 +237,8 @@ class Batch(command.Command):
         """
         sys.argv = [python_file] + batch_arguments
 
-        ns = {'services': services_service}
-        for handler in services_service.interactive_handlers:
-            ns.update(handler.handle_interactive())
+        ns = services_service.handle_interaction()
+        ns['services'] = services_service
 
         builtins.__dict__.update(ns)
 
