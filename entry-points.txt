@@ -1,0 +1,6 @@
+[nagare.commands]
+exec = nagare.admin.exec_shell:Commands
+
+[nagare.commands.exec]
+shell = nagare.admin.exec_shell:Shell
+batch = nagare.admin.exec_shell:Batch

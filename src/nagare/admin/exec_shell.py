@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,7 +7,7 @@
 # this distribution.
 # --
 
-"""The ``shell`` and ``batch`` administrative commands
+"""The ``shell`` and ``batch`` administrative commands.
 
 The ``shell`` command launches an interactive Python shell.
 The ``batch`` command execute Python statements from a file.
@@ -19,30 +19,31 @@ In both cases:
   - the metadata of the applications are activated
 """
 
+import argparse
+import code
 import os
 import sys
-import code
-import argparse
+
 try:
     import __builtin__ as builtins
 except ImportError:
     import builtins
 
-from nagare.server import reference
 from nagare.admin import admin, command
+from nagare.server import reference
 
 
 class Commands(command.Commands):
     DESC = 'interactive and batch runtime subcommands'
 
+
 # -----------------------------------------------------------------------------
 
 
 class IPythonShell(object):
-    """A IPython >= 5.0 interpreter
-    """
-    def __init__(self, ipython, banner, prompt, ns):
+    """A IPython >= 5.0 interpreter."""
 
+    def __init__(self, ipython, banner, prompt, ns):
         class NagarePrompts(ipython.terminal.prompts.Prompts):
             def in_prompt_tokens(self, cli=None):
                 return [
@@ -59,10 +60,10 @@ class IPythonShell(object):
 
 
 class PythonShell(code.InteractiveConsole):
-    """A plain Python interpreter
-    """
+    """A plain Python interpreter."""
+
     def __init__(self, banner, prompt, ns):
-        """Initialisation
+        """Initialisation.
 
         In:
           - ``banner`` -- banner to display
@@ -87,10 +88,10 @@ class PythonShell(code.InteractiveConsole):
 
 
 class PythonShellWithHistory(PythonShell):
-    """A plain Python interpreter with a readline history
-    """
+    """A plain Python interpreter with a readline history."""
+
     def __call__(self, readline):
-        """Launch the interpreter
+        """Launch the interpreter.
 
         In:
           - ``readline`` -- the ``readline`` module
@@ -112,7 +113,7 @@ class PythonShellWithHistory(PythonShell):
 
 
 def create_python_shell(plain, banner, prompt, **ns):
-    """Shell factory
+    """Shell factory.
 
     Create a shell according to the installed modules (``readline`` and ``ipython``)
 
@@ -124,10 +125,11 @@ def create_python_shell(plain, banner, prompt, **ns):
     """
     if not plain:
         try:
-            from ptpython import repl, prompt_style
+            from ptpython import prompt_style, repl
         except ImportError:
             pass
         else:
+
             def configure(repl):
                 class NagarePrompt(prompt_style.ClassicPrompt):
                     def in_prompt(self):
@@ -141,11 +143,7 @@ def create_python_shell(plain, banner, prompt, **ns):
 
             print(banner)
 
-            repl.embed(
-                globals(), ns,
-                history_filename=os.path.expanduser('~/.nagarehistory'),
-                configure=configure
-            )
+            repl.embed(globals(), ns, history_filename=os.path.expanduser('~/.nagarehistory'), configure=configure)
             return
 
         try:
@@ -182,12 +180,16 @@ class Shell(command.Command):
     def set_arguments(self, parser):
         super(Shell, self).set_arguments(parser)
         parser.add_argument(
-            '--plain', action='store_const', const=True, default=False, dest='plain',
-            help='launch a plain Python interpreter instead of PtPython/BPython/IPython'
+            '--plain',
+            action='store_const',
+            const=True,
+            default=False,
+            dest='plain',
+            help='launch a plain Python interpreter instead of PtPython/BPython/IPython',
         )
 
     def run(self, services_service, plain=False):
-        """Launch an interactive shell
+        """Launch an interactive shell.
 
         In:
           - ``parser`` -- the ``optparse.OptParser`` object used to parse the configuration file
@@ -213,12 +215,8 @@ class Shell(command.Command):
 
         app = ns.get('app')
 
-        create_python_shell(
-            plain,
-            banner,
-            '' if app is None else ('[%s]' % app.name),
-            __name__='__console__', **ns
-        )
+        create_python_shell(plain, banner, '' if app is None else ('[%s]' % app.name), __name__='__console__', **ns)
+
 
 # -----------------------------------------------------------------------------
 
@@ -233,8 +231,7 @@ class Batch(command.Command):
         parser.add_argument('batch_arguments', nargs=argparse.REMAINDER, help='optional batch arguments')
 
     def run(self, python_file, batch_arguments, services_service):
-        """Execute Python statements from a file
-        """
+        """Execute Python statements from a file."""
         sys.argv = [python_file] + batch_arguments
 
         ns = services_service.handle_interaction()
