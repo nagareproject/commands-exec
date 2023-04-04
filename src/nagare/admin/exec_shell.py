@@ -41,7 +41,7 @@ class Commands(command.Commands):
 
 
 class IPythonShell(object):
-    """A IPython >= 5.0 interpreter."""
+    """A IPython >= 7.20.0 interpreter."""
 
     def __init__(self, ipython, banner, prompt, ns):
         class NagarePrompts(ipython.terminal.prompts.Prompts):
@@ -52,7 +52,9 @@ class IPythonShell(object):
                     (ipython.terminal.prompts.Token.Prompt, ']: '),
                 ]
 
-        self.shell = ipython.terminal.embed.InteractiveShellEmbed(banner1=banner, user_ns=ns, confirm_exit=False)
+        self.shell = ipython.terminal.embed.InteractiveShellEmbed.instance(
+            banner1=banner, user_ns=ns, confirm_exit=False
+        )
         self.shell.prompts = NagarePrompts(self.shell)
 
     def __call__(self):
