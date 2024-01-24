@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2023 Net-ng.
+# Copyright (c) 2008-2024 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -19,10 +19,10 @@ In both cases:
   - the metadata of the applications are activated
 """
 
-import argparse
-import code
 import os
 import sys
+import code
+import argparse
 
 try:
     import __builtin__ as builtins
@@ -127,7 +127,7 @@ def create_python_shell(plain, banner, prompt, **ns):
     """
     if not plain:
         try:
-            from ptpython import prompt_style, repl
+            from ptpython import repl, prompt_style
         except ImportError:
             pass
         else:
