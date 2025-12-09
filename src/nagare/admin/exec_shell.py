@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -23,11 +23,7 @@ import os
 import sys
 import code
 import argparse
-
-try:
-    import __builtin__ as builtins
-except ImportError:
-    import builtins
+import builtins
 
 from nagare.admin import admin, command
 from nagare.server import reference
@@ -72,7 +68,8 @@ class PythonShell(code.InteractiveConsole):
           - ``prompt`` -- name of the activated application
           - ``ns`` -- the namespace with the ``apps`` and ``session`` variables defined
         """
-        code.InteractiveConsole.__init__(self, ns)
+        super().__init__(ns)
+
         self.banner = banner
         self.prompt = prompt
 
@@ -109,7 +106,7 @@ class PythonShellWithHistory(PythonShell):
 
         readline.set_history_length(200)
 
-        PythonShell.__call__(self)
+        super().__call__()
 
         readline.write_history_file(history_path)
 
@@ -135,10 +132,10 @@ def create_python_shell(plain, banner, prompt, **ns):
             def configure(repl):
                 class NagarePrompt(prompt_style.ClassicPrompt):
                     def in_prompt(self):
-                        return [(super(NagarePrompt, self).in_prompt()[0][0], 'Nagare%s>>> ' % prompt)]
+                        return [(super().in_prompt()[0][0], 'Nagare%s>>> ' % prompt)]
 
                     def in2_prompt(self, width):
-                        return [(super(NagarePrompt, self).in2_prompt(width)[0][0], 'Nagare%s... ' % prompt)]
+                        return [(super().in2_prompt(width)[0][0], 'Nagare%s... ' % prompt)]
 
                 repl.all_prompt_styles['nagare'] = NagarePrompt()
                 repl.prompt_style = 'nagare'
@@ -180,7 +177,8 @@ class Shell(command.Command):
     WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):
-        super(Shell, self).set_arguments(parser)
+        super().set_arguments(parser)
+
         parser.add_argument(
             '--plain',
             action='store_const',
@@ -201,8 +199,7 @@ class Shell(command.Command):
         The arguments are a list of names of registered applications
         or paths to applications configuration files.
         """
-        ns = services_service.handle_interaction()
-        ns['services'] = services_service
+        ns = services_service.handle_interaction() | {'services': services_service}
 
         banner = admin.NAGARE_BANNER + '\n'
         banner += 'Python {} on {}\n\n'.format(sys.version, sys.platform)
@@ -210,14 +207,14 @@ class Shell(command.Command):
         if len(ns) == 1:
             banner += "Variable '{}' is available".format(next(iter(ns)))
         else:
-            variables = ["'{}'".format(variable) for variable in sorted(ns)]
+            variables = [f"'{variable}'" for variable in sorted(ns)]
             banner += 'Variables ' + ', '.join(variables[:-1]) + ' and ' + variables[-1] + ' are available'
 
         banner += '\n'
 
         app = ns.get('app')
 
-        create_python_shell(plain, banner, '' if app is None else ('[%s]' % app.name), __name__='__console__', **ns)
+        create_python_shell(plain, banner, '' if app is None else f'[{app.name}]', __name__='__console__', **ns)
 
 
 # -----------------------------------------------------------------------------
@@ -229,16 +226,14 @@ class Batch(command.Command):
 
     def set_arguments(self, parser):
         parser.add_argument('python_file', help='python batch file')
-        super(Batch, self).set_arguments(parser)
+        super().set_arguments(parser)
         parser.add_argument('batch_arguments', nargs=argparse.REMAINDER, help='optional batch arguments')
 
     def run(self, python_file, batch_arguments, services_service):
         """Execute Python statements from a file."""
         sys.argv = [python_file] + batch_arguments
 
-        ns = services_service.handle_interaction()
-        ns['services'] = services_service
-
+        ns = services_service.handle_interaction() | {'services': services_service}
         builtins.__dict__.update(ns)
 
         reference.load_file(python_file, None)
