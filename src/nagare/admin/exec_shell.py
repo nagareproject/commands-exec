@@ -36,7 +36,7 @@ class Commands(command.Commands):
 # -----------------------------------------------------------------------------
 
 
-class IPythonShell(object):
+class IPythonShell:
     """A IPython >= 7.20.0 interpreter."""
 
     def __init__(self, ipython, banner, prompt, ns):
